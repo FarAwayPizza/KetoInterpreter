@@ -11,6 +11,9 @@ newtype Potassium = Potassium Int
 newtype Magnesium = Magnesium Int
   deriving (Eq, Show)
 newtype Fat = Fat Int
+  deriving (Eq, Show)
+newtype Carbs = Carbs Int
+  deriving (Eq, Show)
 
 data Food = Food
   { foodName :: String
@@ -38,6 +41,10 @@ data CurrentDay = Monday | Tuesday | Wednesday | Thursday | Friday | Saturday | 
 
 evaluator :: [a] -> Bool
 evaluator = null
+
+
+
+
 
 -- mealPlan :: [Int] -> MealPlan
 -- day :: String -> day

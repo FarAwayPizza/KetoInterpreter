@@ -59,7 +59,7 @@ library
     import:           warnings
 
     -- Modules exported by the library.
-    exposed-modules:  MyLib, Evaluator
+    exposed-modules:  MyLib, Evaluator, Parser 
 
     -- Modules included in this library but not exported.
     -- other-modules:
@@ -68,8 +68,11 @@ library
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.19.2.0
-
+    build-depends:    
+        base >=4.20 && < 4.21,
+        text >=2.1.1,
+        megaparsec >= 9.0.0,
+        hashable == 1.5.0.0
     -- Directories containing source files.
     hs-source-dirs:   src
 
@@ -82,7 +85,7 @@ executable ketoInterpreter
 
     -- .hs or .lhs file containing the Main module.
     main-is:          Main.hs
-
+    
     -- Modules included in this executable, other than Main.
     -- other-modules:
 
@@ -91,8 +94,11 @@ executable ketoInterpreter
 
     -- Other library packages from which modules are imported.
     build-depends:
-        base ^>=4.19.2.0,
-        ketoInterpreter
+        base >=4.20 && < 4.21,
+        ketoInterpreter,
+        megaparsec >= 9.0.0,
+        text >= 2.1.1,
+        hashable == 1.5.0.0
 
     -- Directories containing source files.
     hs-source-dirs:   app
@@ -124,8 +130,11 @@ test-suite ketoInterpreter-test
 
     -- Test dependencies.
     build-depends:
-        base ^>=4.19.2.0,
-        ketoInterpreter
+        base >=4.20 && < 4.21,
+        ketoInterpreter,
+        megaparsec >= 9.0.0,
+        text >= 2.1.1,
+        hashable == 1.5.0.0
 
     
 
