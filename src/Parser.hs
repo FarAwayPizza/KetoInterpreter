@@ -25,11 +25,9 @@ symbol = L.symbol spaceConsumer
 integer :: Parser Int
 integer = lexeme L.decimal
 
--- Parse names
 name :: Parser String
 name = lexeme (some (alphaNumChar <|> char '_'))
 
--- Parse one food item (for Effects compatibility)
 parseFoodData :: Parser (String, Map.Map String Int)
 parseFoodData = do
   fName <- name 
@@ -51,7 +49,6 @@ parseFoodData = do
         ]
   return (fName, nutrients)
 
--- Parse all ingredients  
 parseIngredients :: Parser [(String, Map.Map String Int)]
 parseIngredients = do
   _ <- symbol "ingredients" >> symbol "{"
@@ -59,7 +56,6 @@ parseIngredients = do
   _ <- symbol "}"
   return foods
 
--- Parse a meal
 parseMeal :: Parser (String, [(String, Int)])
 parseMeal = do
   _ <- symbol "meal"
@@ -91,7 +87,6 @@ parseDay = do
 
  
 
--- Parse the whole file (Effects-compatible version)
 parseKetoDiet :: Parser ([(String, Map.Map String Int)], [(CurrentDay, [(String, [(String, Int)])])])
 parseKetoDiet = do
   spaceConsumer
@@ -102,7 +97,6 @@ parseKetoDiet = do
   eof
   return (ingredients, days)
 
--- Run the parser (Effects-compatible)
 runParser :: String -> Either String ([(String, Map.Map String Int)], [(CurrentDay, [(String, [(String, Int)])])])
 runParser input = case parse parseKetoDiet "input" input of
   Left err -> Left (show err)
@@ -110,7 +104,6 @@ runParser input = case parse parseKetoDiet "input" input of
 
 
 
-  -- Parse just ingredients from a file
 parseIngredientsOnly :: Parser [(String, Map.Map String Int)]
 parseIngredientsOnly = do
     spaceConsumer
@@ -118,7 +111,6 @@ parseIngredientsOnly = do
     eof
     return result
 
--- Parse just meal plan from a file
 parseMealPlanOnly :: Parser [(CurrentDay, [(String, [(String, Int)])])]
 parseMealPlanOnly = do
     spaceConsumer

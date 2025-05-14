@@ -40,7 +40,6 @@ main = do
 
     _ -> putStrLn "Usage: ketoInterpreter <file> OR ketoInterpreter <ingredients-file> <meals-file>"
 
--- Run all effects at the top level
 runEffects :: [(String, Map.Map String Int)] -> [(CurrentDay, [(String, [(String, Int)])])] -> IO ()
 runEffects ingredients days = do
   let constraints = DietConstraints
@@ -52,7 +51,6 @@ runEffects ingredients days = do
         , goalMagnesium = 400
         }
   
-  -- Run effects in correct order  
   result <- runM 
     . runConsoleIO 
     . runDietOps
@@ -61,19 +59,16 @@ runEffects ingredients days = do
     . runWriter @[Violation]
     $ processAllDays ingredients days
   
-  -- Handle the result
   case result of
     (_, violations) -> do
       unless (null violations) $ do
         putStrLn "\nOverall violations found:"
         forM_ violations print
 
--- Process all days
 processAllDays :: Members '[Console, DietOps, State NutritionState, Writer [Violation], Reader DietConstraints] r => [(String, Map.Map String Int)] -> [(CurrentDay, [(String, [(String, Int)])])]  -> Eff r ()
 processAllDays ingredients days = do
   send $ PrintLine "Parse successful!"
   
-  -- Create food map
   let foodMap = Map.fromList
         [ (ingredientName, Food
             { foodName = ingredientName
@@ -92,16 +87,13 @@ processAllDays ingredients days = do
     put (NutritionState 0 0 0 0 0 0)
     processDay foodMap (day, meals)
 
--- Process a single day
 processDay :: Members '[Console, DietOps, State NutritionState, Writer [Violation], Reader DietConstraints] r => Map.Map String Food -> (CurrentDay, [(String, [(String, Int)])]) -> Eff r ()
 processDay foodMap (day, meals) = do
   send $ PrintLine $ "\n=== " ++ show day ++ " ==="
   
-  -- Debug output (remove these lines for clean output)
   send $ PrintLine $ "Foods in meals: " ++ show [(fName, quantity) | (_, foods) <- meals, (fName, quantity) <- foods]
   send $ PrintLine $ "Foods available: " ++ show (Map.keys foodMap)
   
-  -- Process all foods for the day
   forM_ meals $ \(mealName, foods) -> do
     send $ PrintLine $ "Processing meal: " ++ mealName
     forM_ foods $ \(localFoodName, quantity) -> do
@@ -114,13 +106,10 @@ processDay foodMap (day, meals) = do
           modify (`addNutrition` scaled)
         Nothing -> send $ PrintLine $ "NOT FOUND: " ++ localFoodName
   
-  -- Get final state
   finalState <- get
   
-  -- Check constraints (this writes violations)
   checkConstraints
   
-  -- Display results
   send $ PrintLine "\n  Daily Totals:"
   send $ PrintLine $ "    Carbs:     " ++ show (currentCarbs finalState) ++ "g"
   send $ PrintLine $ "    Fat:       " ++ show (currentFat finalState) ++ "g"
@@ -128,7 +117,6 @@ processDay foodMap (day, meals) = do
   send $ PrintLine $ "    Potassium: " ++ show (currentPotassium finalState) ++ "mg"
   send $ PrintLine $ "    Magnesium: " ++ show (currentMagnesium finalState) ++ "mg"
 
--- Helper function to scale food nutrition by quantity
 scaleFood :: Food -> Int -> NutritionState
 scaleFood (Food _ sodiumVal potassiumVal magnesiumVal fatVal carbsVal weightVal) grams =
   let scale :: Double = fromIntegral grams / 100.0
@@ -141,7 +129,6 @@ scaleFood (Food _ sodiumVal potassiumVal magnesiumVal fatVal carbsVal weightVal)
      , currentMagnesium = round (fromIntegral magnesiumVal * scale)
      }
 
--- Helper function to add two nutrition states
 addNutrition :: NutritionState -> NutritionState -> NutritionState
 addNutrition n1 n2 = NutritionState
   { currentCarbs = currentCarbs n1 + currentCarbs n2

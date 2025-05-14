@@ -17,7 +17,7 @@ import Control.Monad.Freer.Reader
 import Control.Monad.Freer.Error
 import Control.Monad.Freer.Writer
 import Control.Monad (when)
-import qualified Data.Map.Strict as Map  -- Keep Map functions qualified
+import qualified Data.Map.Strict as Map  
 import Prelude 
 import AST (Food(..))
 
@@ -57,7 +57,6 @@ data Violation
   | MagnesiumGoalsMissed Int Int
   deriving (Eq, Show)
 
--- Remove any duplicate DietOps declaration - keep only one
 data DietOps r where
   CreateFood :: String -> Map.Map String Int -> DietOps (Either DietError Food)
   ValidateNutrients :: Map.Map String Int -> DietOps (Either DietError ())
@@ -75,7 +74,6 @@ type HasDietOps r = Member DietOps r
 
 type DietEffects r = (HasNutritionState r, HasDietConstraints r, HasDietError r, HasViolationLog r, HasDietOps r)
 
--- Interpreter for DietOps
 runDietOps :: Eff (DietOps ': r) a -> Eff r a
 runDietOps = interpret $ \case
   CreateFood name nutrients -> do
@@ -85,7 +83,6 @@ runDietOps = interpret $ \case
     if not (null missing)
       then return $ Left $ MissingNutrients missing
       else do
-        -- Check for negative values
         let negatives = Map.filter (< 0) nutrients
         if not (Map.null negatives)
           then return $ Left $ InvalidNutrientValue (fst $ Map.findMin negatives) (snd $ Map.findMin negatives)
@@ -108,18 +105,15 @@ runDietOps = interpret $ \case
   LookupFood name foodMap ->
     return $ Map.lookup name foodMap
 
--- IO interpreter (for production)
 runConsoleIO :: Member IO r => Eff (Console ': r) a -> Eff r a
 runConsoleIO = interpret $ \case
   PrintLine s -> send $ putStrLn s
 
--- Pure interpreter (for testing)
 runConsolePure :: Eff (Console ': r) a -> Eff r (a, [String])
 runConsolePure = runWriter . reinterpret (\case
   PrintLine s -> tell [s])
 
 
--- Existing effect handlers (unchanged)
 getNutritionState :: Member (State NutritionState) r => Eff r NutritionState
 getNutritionState = get
 
@@ -159,7 +153,6 @@ logViolation violation = tell [violation]
 logViolations :: Member (Writer [Violation]) r => [Violation] -> Eff r ()
 logViolations = tell
 
--- Updated checkConstraints to work with Food objects (unchanged)
 checkConstraints :: (Member (State NutritionState) r, Member (Reader DietConstraints) r, Member (Writer [Violation]) r) => Eff r ()
 checkConstraints = do
   state <- getNutritionState
@@ -183,7 +176,6 @@ checkCarbLimit = do
   constraints <- ask
   return (currentCarbs state <= maxCarbs constraints)
 
--- Add these helper functions to work with parsed data
 processIngredients :: (Member DietOps r, Member (Error DietError) r) => [(String, Map.Map String Int)] -> Eff r (Map.Map String Food)
 processIngredients ingredients  = do
   foods <- mapM processIngredient ingredients 
