@@ -1,5 +1,5 @@
 To run program
 
-cabal clean /n
-cabal update /n
+cabal clean\n
+cabal updatev
 cabal run ketoInterpreter.cabal samples/ingredients.dsl -- samples/mealPlan.dsl
