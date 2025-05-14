@@ -59,7 +59,7 @@ library
     import:           warnings
 
     -- Modules exported by the library.
-    exposed-modules:  MyLib, Evaluator, Parser 
+    exposed-modules:  Evaluator, Parser, AST, Effects
 
     -- Modules included in this library but not exported.
     -- other-modules:
@@ -72,7 +72,11 @@ library
         base < 5.0,
         text,
         megaparsec,
-        hashable
+        hashable,
+        containers,
+        freer-simple,
+        mtl 
+
     -- Directories containing source files.
     hs-source-dirs:   src
 
@@ -97,7 +101,9 @@ executable ketoInterpreter
         base < 5.0,
         ketoInterpreter,
         megaparsec,
-        text
+        text, 
+        containers, 
+        freer-simple
 
     -- Directories containing source files.
     hs-source-dirs:   app
@@ -113,24 +119,24 @@ test-suite ketoInterpreter-test
     default-language: Haskell2010
 
     -- Modules included in this executable, other than Main.
-    -- other-modules:
+    other-modules:    
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
-
+    build-depends: QuickCheck, ketoInterpreter, mtl, containers
     -- The interface type and version of the test suite.
     type:             exitcode-stdio-1.0
 
     -- Directories containing source files.
-    hs-source-dirs:   test
-
+    hs-source-dirs:   
     -- The entrypoint to the test suite.
     main-is:          Main.hs
 
     -- Test dependencies.
     build-depends:
         base < 5.0,
-        ketoInterpreter
-
+        ketoInterpreter,
+        
+       
     
 
